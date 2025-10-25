@@ -16,7 +16,7 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
-// Show loading state
+
 root.render(
   <div style={{
     display: 'flex',
@@ -29,14 +29,12 @@ root.render(
   </div>
 );
 
-// Initialize environment before rendering
 (async () => {
   try {
     console.log("Main: Starting app initialization...");
     await initializeEnvironment();
     console.log("Main: WASM initialized, rendering app...");
 
-    // Render the app once initialized
     root.render(
       <React.StrictMode>
         <ErrorBoundary>
@@ -49,7 +47,6 @@ root.render(
   } catch (error) {
     console.error("Failed to initialize app:", error);
 
-    // Render error state with more details
     const errorMessage = error instanceof Error ? error.message : String(error);
     root.render(
       <div style={{
@@ -69,7 +66,6 @@ root.render(
   }
 })();
 
-// Handle HMR to prevent re-initialization issues
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
     console.log("HMR: Module updated");

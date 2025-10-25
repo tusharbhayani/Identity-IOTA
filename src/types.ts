@@ -1,8 +1,3 @@
-/**
- * Type Definitions for IOTA Identity WASM Module
- */
-
-// Import base types from WASM module
 import type {
   IotaIdentityClient,
   IotaDocument,
@@ -10,15 +5,13 @@ import type {
   VerificationMethod,
 } from "@iota/identity-wasm/web";
 
-// Export the types with friendly names
-export type { 
+export type {
   IotaIdentityClient as Client,
   IotaDocument as Document,
-  Storage, 
-  VerificationMethod 
+  Storage,
+  VerificationMethod,
 };
 
-// Define the expected module interface
 export interface IotaModule {
   init(): Promise<void>;
   IotaIdentityClient: typeof IotaIdentityClient;
@@ -28,7 +21,6 @@ export interface IotaModule {
   initialized?: boolean;
 }
 
-// Error type for WASM loading failures
 export class WasmLoadError extends Error {
   constructor(
     message: string,
