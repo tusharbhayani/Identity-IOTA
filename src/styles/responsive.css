@@ -1,0 +1,266 @@
+/* Global text input style for forms */
+.text-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--gray-5);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.text-input:focus {
+  border-color: var(--accent-9);
+}
+
+.text-input::placeholder {
+  color: var(--gray-8);
+}
+
+@media (max-width: 768px) {
+  .text-input {
+    font-size: 16px; /* Prevent zoom on mobile */
+  }
+}
+/* Responsive design improvements for IOTA Identity dApp */
+
+/* Base responsive container improvements */
+@media (max-width: 1200px) {
+  .rt-Container {
+    max-width: 95% !important;
+    padding: 0 16px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .rt-Container {
+    max-width: 100% !important;
+    padding: 0 12px !important;
+  }
+
+  /* Adjust card spacing on mobile */
+  .rt-Card {
+    margin-bottom: 16px !important;
+  }
+
+  /* Make buttons stack better on mobile */
+  .rt-Flex[data-wrap="wrap"] {
+    gap: 8px !important;
+  }
+
+  .rt-Flex[data-wrap="wrap"] > .rt-Button {
+    flex: 1 1 45% !important;
+    min-width: 120px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Full width buttons on very small screens */
+  .rt-Flex[data-wrap="wrap"] > .rt-Button {
+    flex: 1 1 100% !important;
+    min-width: auto !important;
+  }
+
+  /* Adjust typography for small screens */
+  .rt-Heading[data-size="6"] {
+    font-size: 1.5rem !important;
+  }
+
+  .rt-Heading[data-size="4"] {
+    font-size: 1.25rem !important;
+  }
+
+  /* Improve text area readability */
+  .rt-TextArea {
+    font-size: 12px !important;
+  }
+
+  /* Make dialogs full screen on mobile */
+  .rt-Dialog-Content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* QR Code responsive improvements */
+@media (max-width: 768px) {
+  .qr-generator .rt-Box[style*="display: inline-block"] {
+    padding: 8px !important;
+  }
+
+  .qr-generator svg {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+/* Wallet storage responsive improvements */
+@media (max-width: 768px) {
+  .wallet-storage .rt-Flex[data-wrap="wrap"] {
+    flex-direction: column !important;
+  }
+
+  .wallet-storage .rt-Flex[data-wrap="wrap"] > * {
+    flex: 1 1 100% !important;
+    min-width: auto !important;
+  }
+}
+
+/* DID Display responsive improvements */
+@media (max-width: 768px) {
+  .did-display .rt-TextArea {
+    font-size: 10px !important;
+    min-height: 40px !important;
+  }
+
+  .did-display .rt-Flex[data-justify="between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+
+  .did-display .rt-Text[style*="fontFamily: 'monospace'"] {
+    font-size: 9px !important;
+    word-break: break-all !important;
+  }
+}
+
+/* VC/VP Display responsive improvements */
+@media (max-width: 768px) {
+  .vc-display .rt-Flex[data-gap="2"] {
+    flex-wrap: wrap !important;
+  }
+
+  .vc-display .rt-Button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
+  .vp-display .rt-Flex[data-gap="2"] {
+    flex-wrap: wrap !important;
+  }
+
+  .vp-display .rt-Button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* Badge responsive improvements */
+@media (max-width: 480px) {
+  .rt-Badge {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+  }
+}
+
+/* Log display improvements */
+@media (max-width: 768px) {
+  .rt-TextArea[style*="fontFamily: 'monospace'"] {
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Component spacing improvements */
+@media (max-width: 768px) {
+  .component-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .component-grid > * {
+    flex: 1 1 100% !important;
+    min-width: auto !important;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  .rt-Button {
+    min-height: 40px !important;
+    padding: 8px 16px !important;
+  }
+
+  .rt-IconButton {
+    min-height: 40px !important;
+    min-width: 40px !important;
+  }
+}
+
+/* Scrollable content improvements */
+@media (max-width: 768px) {
+  .rt-Box[style*="maxHeight"][style*="overflow: auto"] {
+    max-height: 50vh !important;
+  }
+}
+
+/* Select dropdown improvements */
+@media (max-width: 768px) {
+  .rt-Select-Trigger {
+    font-size: 14px !important;
+    min-height: 40px !important;
+  }
+}
+
+/* Copy button improvements */
+@media (max-width: 768px) {
+  .rt-Button[aria-label*="copy"],
+  .rt-Button:has(span:contains("📋")),
+  .rt-Button:has(span:contains("✓")) {
+    padding: 6px 8px !important;
+    min-width: 35px !important;
+  }
+}
+
+/* Layout improvements for component combinations */
+@media (max-width: 768px) {
+  /* When wallet and QR are displayed together */
+  .component-pair {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .component-pair > * {
+    flex: 1 1 100% !important;
+    min-width: auto !important;
+  }
+}
+
+/* Print styles for QR codes */
+@media print {
+  .qr-generator {
+    break-inside: avoid;
+  }
+
+  .qr-generator svg {
+    width: 200px !important;
+    height: 200px !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .rt-Card {
+    border: 2px solid !important;
+  }
+
+  .rt-Badge {
+    border: 1px solid !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

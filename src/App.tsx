@@ -1,4 +1,4 @@
-import { ConnectButton } from "@iota/dapp-kit";
+// import { ConnectButton } from "@iota/dapp-kit";
 import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 import { WalletStatus } from "./WalletStatus";
 
@@ -18,9 +18,9 @@ function App() {
           <Heading>dApp Starter Template</Heading>
         </Box>
 
-        <Box>
+        {/* <Box>
           <ConnectButton />
-        </Box>
+        </Box> */}
       </Flex>
       <Container>
         <Container

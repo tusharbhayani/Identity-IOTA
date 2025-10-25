@@ -1,9 +1,9 @@
-import { useCurrentAccount } from "@iota/dapp-kit";
 import { Container, Flex, Heading, Text } from "@radix-ui/themes";
 import { OwnedObjects } from "./OwnedObjects";
+import { useAccount } from "./hooks/useAccount";
 
 export function WalletStatus() {
-  const account = useCurrentAccount();
+  const account = useAccount();
 
   return (
     <Container my="2">
