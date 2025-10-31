@@ -23,6 +23,25 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ["server.js", "*.server.js"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
+        exports: "readonly",
+        module: "readonly",
+        require: "readonly",
+      },
+    },
+    rules: {
+      "no-console": "off",
+    },
+  },
   eslint.configs.recommended,
   tseslint.configs.recommended,
 );

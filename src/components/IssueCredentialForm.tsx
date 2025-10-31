@@ -1,5 +1,8 @@
-import { Box, Button, Card, Flex, Heading, Text, TextField } from "@radix-ui/themes";
+import { Box, Button, Card, Flex, Heading, Text, TextField, Checkbox } from "@radix-ui/themes";
 import { useState } from "react";
+import { Jwt } from "@iota/identity-wasm/web";
+import { InvitationDisplay } from "./InvitationDisplay";
+import { invitationService, StoredInvitation } from "../services/invitationService";
 
 export interface CustomFieldValue {
     key: string;
@@ -12,7 +15,7 @@ export interface IssueCredentialFormProps {
         type: string;
         id: string;
         customFields: Record<string, string>;
-    }) => Promise<void>;
+    }) => Promise<{ credentialJwt: Jwt; invitation?: StoredInvitation }>;
     onCancel: () => void;
 }
 
@@ -26,8 +29,13 @@ export function IssueCredentialForm({
     const [customFields, setCustomFields] = useState<CustomFieldValue[]>([
         { key: "", value: "" },
     ]);
+    const [generateInvitation, setGenerateInvitation] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [issuedCredential, setIssuedCredential] = useState<{
+        jwt: Jwt;
+        invitation?: StoredInvitation;
+    } | null>(null);
 
     const addField = () => {
         setCustomFields([...customFields, { key: "", value: "" }]);
@@ -72,10 +80,24 @@ export function IssueCredentialForm({
         setIsLoading(true);
 
         try {
-            await onIssue({
+            const result = await onIssue({
                 type: credentialType,
                 id: credentialId,
                 customFields: customFieldsObj,
+            });
+
+            let invitation: StoredInvitation | undefined;
+            if (generateInvitation) {
+                invitation = await invitationService.generateCredentialInvitation(
+                    result.credentialJwt,
+                    credentialType,
+                    subjectDID
+                );
+            }
+
+            setIssuedCredential({
+                jwt: result.credentialJwt,
+                invitation,
             });
 
             setCredentialType("");
@@ -87,6 +109,66 @@ export function IssueCredentialForm({
             setIsLoading(false);
         }
     };
+
+    const handleClose = () => {
+        setIssuedCredential(null);
+        onCancel();
+    };
+
+    if (issuedCredential) {
+        return (
+            <Flex direction="column" gap="4">
+                <Card size="3">
+                    <Flex direction="column" gap="4">
+                        <Flex justify="between" align="center">
+                            <Heading size="5">✅ Credential Issued Successfully!</Heading>
+                            <Button variant="ghost" size="1" onClick={handleClose}>
+                                ✕ Close
+                            </Button>
+                        </Flex>
+
+                        <Text size="2" color="gray">
+                            Your credential has been created and is ready to be shared.
+                        </Text>
+
+                        <Box>
+                            <Text size="2" weight="bold" mb="2">
+                                🎫 Credential JWT
+                            </Text>
+                            <Box
+                                p="3"
+                                style={{
+                                    background: "var(--gray-3)",
+                                    borderRadius: "8px",
+                                    fontFamily: "monospace",
+                                    fontSize: "11px",
+                                    wordBreak: "break-all",
+                                    maxHeight: "100px",
+                                    overflow: "auto",
+                                }}
+                            >
+                                {issuedCredential.jwt.toString()}
+                            </Box>
+                        </Box>
+
+                        <Button
+                            variant="soft"
+                            onClick={() => setIssuedCredential(null)}
+                        >
+                            📝 Issue Another Credential
+                        </Button>
+                    </Flex>
+                </Card>
+
+                {issuedCredential.invitation && (
+                    <InvitationDisplay
+                        invitation={issuedCredential.invitation}
+                        onClose={() => setIssuedCredential(null)}
+                    />
+                )}
+            </Flex>
+        );
+    }
 
     return (
         <Card size="3">
@@ -173,6 +255,21 @@ export function IssueCredentialForm({
                                 </Flex>
                             ))}
                         </Flex>
+                    </Box>
+
+                    <Box>
+                        <Flex align="center" gap="2">
+                            <Checkbox
+                                checked={generateInvitation}
+                                onCheckedChange={(checked) => setGenerateInvitation(checked === true)}
+                            />
+                            <Text size="2">
+                                🔗 Generate invitation URL for wallet sharing
+                            </Text>
+                        </Flex>
+                        <Text size="1" color="gray" mt="1">
+                            Creates a QR code and URL that can be shared with mobile wallets
+                        </Text>
                     </Box>
 
                     {error && (

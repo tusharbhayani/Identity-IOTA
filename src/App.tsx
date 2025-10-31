@@ -3,12 +3,14 @@ import { Badge, Box, Button, Container, Flex, Heading, Tabs, Text, Theme } from 
 import "@radix-ui/themes/styles.css";
 import "./styles/responsive.css";
 import { initIdentity } from "./util";
-import { SimpleIdentityFlow } from "./SimpleIdentityFlow";
 import { IssueCredentialForm } from "./components/IssueCredentialForm";
 import { CreatePresentationForm, StoredCredential } from "./components/CreatePresentationForm";
 import { VerificationForm, VerificationResult } from "./components/VerificationForm";
 import { CredentialCard } from "./components/CredentialCardNew";
 import { CredentialDetails } from "./components/CredentialDetails";
+import { InvitationsTab } from "./components/InvitationsTab";
+import { CredentialScanner } from "./components/CredentialScanner";
+import { WalletCredentials } from "./components/WalletCredentials";
 import * as credentialService from "./services/credentialService";
 import * as presentationService from "./services/presentationService";
 import type { IotaDocument } from "@iota/identity-wasm/web";
@@ -124,6 +126,8 @@ function App() {
       setCredentials(credentialService.loadCredentials());
       setShowIssueForm(false);
       setStatus(`✅ Credential "${data.type}" issued successfully!`);
+
+      return { credentialJwt: jwt };
     } catch (err) {
       throw new Error(
         `Failed to issue credential: ${err instanceof Error ? err.message : String(err)}`
@@ -240,6 +244,21 @@ function App() {
         `Failed to create presentation: ${err instanceof Error ? err.message : String(err)}`
       );
     }
+  };
+
+  const handleClearCredentials = () => {
+    credentialService.clearCredentials();
+    setCredentials([]);
+    setStatus('🗑️ All credentials cleared successfully!');
+    setError(null);
+  };
+
+  const handleClearPresentations = () => {
+    presentationService.clearPresentations();
+    setPresentations([]);
+    setSelectedPresentation(null);
+    setStatus('🗑️ All presentations cleared successfully!');
+    setError(null);
   };
 
   const handleViewPresentationDetails = (presentation: StoredPresentation) => {
@@ -414,18 +433,23 @@ function App() {
             {isInitialized && (
               <Tabs.Root value={currentTab} onValueChange={setCurrentTab}>
                 <Tabs.List>
-                  <Tabs.Trigger value="simple">🚀 Simple Flow</Tabs.Trigger>
-                  <Tabs.Trigger value="identity">🆔 Identity</Tabs.Trigger>
-                  <Tabs.Trigger value="credentials">
-                    📜 Credentials
+                  <Tabs.Trigger value="identity">🆔 My Identity</Tabs.Trigger>
+                  <Tabs.Trigger value="issue">
+                    📝 Issue Credentials
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="invitations">
+                    � Share Invitations
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="wallet">
+                    💼 My Wallet
                     {credentials.length > 0 && (
-                      <Badge ml="2" variant="solid">
+                      <Badge ml="2" variant="solid" color="green">
                         {credentials.length}
                       </Badge>
                     )}
                   </Tabs.Trigger>
                   <Tabs.Trigger value="presentations">
-                    🎯 Presentations
+                    🎯 Create Proof
                     {presentations.length > 0 && (
                       <Badge ml="2" variant="solid">
                         {presentations.length}
@@ -435,15 +459,79 @@ function App() {
                   <Tabs.Trigger value="verify">🔍 Verify</Tabs.Trigger>
                 </Tabs.List>
 
-                <Tabs.Content value="simple">
-                  <Box mt="4">
-                    <SimpleIdentityFlow />
-                  </Box>
-                </Tabs.Content>
-
                 <Box pt="4">
-
                   <Tabs.Content value="identity">
+                    <Flex direction="column" gap="4">
+                      <Box
+                        p="4"
+                        style={{
+                          background: 'var(--blue-3)',
+                          borderRadius: '12px',
+                          border: '2px solid var(--blue-6)',
+                        }}
+                      >
+                        <Text size="3" weight="bold" mb="2">
+                          👤 About Decentralized Identity
+                        </Text>
+                        <Text size="2" color="gray">
+                          Your DID (Decentralized Identifier) is your unique digital identity.
+                          Create one to start issuing and receiving verifiable credentials.
+                        </Text>
+                      </Box>
+
+                      {!didDocument ? (
+                        <>
+                          <Button
+                            size="3"
+                            variant="solid"
+                            onClick={handleCreateIdentity}
+                            disabled={isLoading}
+                            style={{ fontSize: '16px', padding: '20px' }}
+                          >
+                            {isLoading ? '⏳ Creating Identity...' : '🆔 Create My Identity'}
+                          </Button>
+                        </>
+                      ) : (
+                        <Box
+                          p="4"
+                          style={{
+                            background: 'var(--green-3)',
+                            borderRadius: '12px',
+                            border: '2px solid var(--green-6)',
+                          }}
+                        >
+                          <Flex direction="column" gap="2">
+                            <Flex align="center" gap="2">
+                              <Badge color="green" size="3">✓ Active</Badge>
+                              <Text size="3" weight="bold">
+                                Your Decentralized Identity
+                              </Text>
+                            </Flex>
+                            <Text size="2" color="gray" mb="2">
+                              DID:
+                            </Text>
+                            <Text
+                              size="2"
+                              style={{
+                                fontFamily: 'monospace',
+                                wordBreak: 'break-all',
+                                background: 'var(--gray-3)',
+                                padding: '12px',
+                                borderRadius: '8px',
+                              }}
+                            >
+                              {didDocument.id().toString()}
+                            </Text>
+                            <Text size="1" color="gray" mt="2">
+                              💡 Use this identity to issue credentials or create presentations
+                            </Text>
+                          </Flex>
+                        </Box>
+                      )}
+                    </Flex>
+                  </Tabs.Content>
+
+                  <Tabs.Content value="issue">
                     <Flex direction="column" gap="4">
                       {!didDocument ? (
                         <>
@@ -484,7 +572,197 @@ function App() {
                     </Flex>
                   </Tabs.Content>
 
-                  <Tabs.Content value="credentials">
+                  <Tabs.Content value="issue">
+                    <Flex direction="column" gap="4">
+                      {!didDocument ? (
+                        <Box
+                          p="5"
+                          style={{
+                            background: 'var(--gray-3)',
+                            borderRadius: '12px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          <Text size="4" weight="bold" mb="2">
+                            🔒 Identity Required
+                          </Text>
+                          <Text size="3" color="gray">
+                            Create an identity first to issue credentials
+                          </Text>
+                          <Button
+                            size="3"
+                            variant="solid"
+                            mt="3"
+                            onClick={() => setCurrentTab("identity")}
+                          >
+                            Go to Identity Tab
+                          </Button>
+                        </Box>
+                      ) : (
+                        <>
+                          {!showIssueForm ? (
+                            <>
+                              <Box
+                                p="4"
+                                style={{
+                                  background: 'var(--blue-3)',
+                                  borderRadius: '12px',
+                                  border: '2px solid var(--blue-6)',
+                                }}
+                              >
+                                <Text size="3" weight="bold" mb="2">
+                                  📝 Issue Verifiable Credentials
+                                </Text>
+                                <Text size="2" color="gray">
+                                  Create digital credentials (birth certificates, degrees, licenses)
+                                  and share them securely with holders via QR codes or URLs.
+                                </Text>
+                              </Box>
+
+                              <Flex gap="2">
+                                <Button
+                                  size="3"
+                                  variant="solid"
+                                  onClick={() => setShowIssueForm(true)}
+                                  style={{ flex: 1 }}
+                                >
+                                  ➕ Issue New Credential
+                                </Button>
+                                {credentials.length > 0 && (
+                                  <Button
+                                    size="3"
+                                    variant="soft"
+                                    color="red"
+                                    onClick={handleClearCredentials}
+                                  >
+                                    🗑️ Clear All
+                                  </Button>
+                                )}
+                              </Flex>
+
+                              {credentials.length === 0 ? (
+                                <Box
+                                  p="5"
+                                  style={{
+                                    background: 'var(--gray-3)',
+                                    borderRadius: '12px',
+                                    textAlign: 'center',
+                                  }}
+                                >
+                                  <Text size="5" mb="2">📭</Text>
+                                  <Text size="3" color="gray">
+                                    No credentials issued yet
+                                  </Text>
+                                  <Text size="2" color="gray" mt="1">
+                                    Click "Issue New Credential" to get started
+                                  </Text>
+                                </Box>
+                              ) : (
+                                <Flex direction="column" gap="3">
+                                  {credentials.map((credential, index) => (
+                                    <CredentialCard
+                                      key={index}
+                                      credential={credential}
+                                      onVerify={async () => {
+                                        try {
+                                          setStatus('🔍 Verifying credential...');
+                                          const result = await handleVerifyCredential(credential.jwt);
+                                          if (result.isValid) {
+                                            setStatus(`✅ Credential verified successfully!`);
+                                            setError(null);
+                                          } else {
+                                            setStatus(`❌ Credential verification failed`);
+                                            setError(result.errors?.join(', ') || 'Verification failed');
+                                          }
+                                        } catch (err) {
+                                          setStatus(`❌ Verification error`);
+                                          setError(err instanceof Error ? err.message : String(err));
+                                        }
+                                      }}
+                                      onCreatePresentation={async () => {
+                                        setCurrentTab("presentations");
+                                        setShowPresentationForm(true);
+                                      }}
+                                    />
+                                  ))}
+                                </Flex>
+                              )}
+                            </>
+                          ) : (
+                            <IssueCredentialForm
+                              subjectDID={didDocument.id().toString()}
+                              onIssue={handleIssueCredential}
+                              onCancel={() => setShowIssueForm(false)}
+                            />
+                          )}
+                        </>
+                      )}
+                    </Flex>
+                  </Tabs.Content>
+
+                  <Tabs.Content value="invitations">
+                    <InvitationsTab />
+                  </Tabs.Content>
+
+                  <Tabs.Content value="wallet">
+                    <Box>
+                      <Box
+                        mb="4"
+                        p="4"
+                        style={{
+                          background: 'var(--green-3)',
+                          borderRadius: '12px',
+                          border: '2px solid var(--green-6)',
+                        }}
+                      >
+                        <Text size="3" weight="bold" mb="2">
+                          💼 Your Digital Wallet
+                        </Text>
+                        <Text size="2" color="gray">
+                          Receive, store, and manage verifiable credentials.
+                          Scan QR codes or paste invitation URLs to add credentials.
+                        </Text>
+                      </Box>
+
+                      <Tabs.Root defaultValue="scan">
+                        <Tabs.List>
+                          <Tabs.Trigger value="scan">📷 Receive Credentials</Tabs.Trigger>
+                          <Tabs.Trigger value="stored">
+                            💾 Stored Credentials
+                            {credentials.length > 0 && (
+                              <Badge ml="2" variant="solid" color="green">
+                                {credentials.length}
+                              </Badge>
+                            )}
+                          </Tabs.Trigger>
+                        </Tabs.List>
+
+                        <Box pt="4">
+                          <Tabs.Content value="scan">
+                            <CredentialScanner
+                              onCredentialAccepted={(credentialId) => {
+                                console.log("✅ Credential accepted:", credentialId);
+                                // Auto-switch to stored tab after accepting
+                                setTimeout(() => {
+                                  const storedTab = document.querySelector('[value="stored"]') as HTMLElement;
+                                  storedTab?.click();
+                                }, 1000);
+                              }}
+                              onError={(error) => {
+                                setError(error.message);
+                              }}
+                            />
+                          </Tabs.Content>
+
+                          <Tabs.Content value="stored">
+                            <WalletCredentials />
+                          </Tabs.Content>
+                        </Box>
+                      </Tabs.Root>
+                    </Box>
+                  </Tabs.Content>
+
+                  <Tabs.Content value="presentations">
                     <Flex direction="column" gap="4">
                       {!didDocument ? (
                         <Text size="3" color="gray">
@@ -494,13 +772,25 @@ function App() {
                         <>
                           {!showIssueForm ? (
                             <>
-                              <Button
-                                size="3"
-                                variant="solid"
-                                onClick={() => setShowIssueForm(true)}
-                              >
-                                ➕ Issue New Credential
-                              </Button>
+                              <Flex gap="2">
+                                <Button
+                                  size="3"
+                                  variant="solid"
+                                  onClick={() => setShowIssueForm(true)}
+                                >
+                                  ➕ Issue New Credential
+                                </Button>
+                                {credentials.length > 0 && (
+                                  <Button
+                                    size="3"
+                                    variant="soft"
+                                    color="red"
+                                    onClick={handleClearCredentials}
+                                  >
+                                    🗑️ Clear All Credentials
+                                  </Button>
+                                )}
+                              </Flex>
 
                               {credentials.length === 0 ? (
                                 <Box
@@ -568,14 +858,26 @@ function App() {
                         <>
                           {!showPresentationForm ? (
                             <>
-                              <Button
-                                size="3"
-                                variant="solid"
-                                onClick={() => setShowPresentationForm(true)}
-                                disabled={credentials.length === 0}
-                              >
-                                ➕ Create New Presentation
-                              </Button>
+                              <Flex gap="2">
+                                <Button
+                                  size="3"
+                                  variant="solid"
+                                  onClick={() => setShowPresentationForm(true)}
+                                  disabled={credentials.length === 0}
+                                >
+                                  ➕ Create New Presentation
+                                </Button>
+                                {presentations.length > 0 && (
+                                  <Button
+                                    size="3"
+                                    variant="soft"
+                                    color="red"
+                                    onClick={handleClearPresentations}
+                                  >
+                                    🗑️ Clear All Presentations
+                                  </Button>
+                                )}
+                              </Flex>
 
                               {presentations.length === 0 ? (
                                 <Box
@@ -665,6 +967,30 @@ function App() {
                         </>
                       )}
                     </Flex>
+                  </Tabs.Content>
+
+                  <Tabs.Content value="invitations">
+                    <InvitationsTab />
+                  </Tabs.Content>
+
+                  <Tabs.Content value="wallet-scan">
+                    <Box mt="4">
+                      <CredentialScanner
+                        onCredentialAccepted={(credentialId) => {
+                          console.log("✅ Credential accepted:", credentialId);
+                          setCurrentTab("wallet-view");
+                        }}
+                        onError={(error) => {
+                          setError(error.message);
+                        }}
+                      />
+                    </Box>
+                  </Tabs.Content>
+
+                  <Tabs.Content value="wallet-view">
+                    <Box mt="4">
+                      <WalletCredentials />
+                    </Box>
                   </Tabs.Content>
 
                   <Tabs.Content value="verify">
