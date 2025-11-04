@@ -20,7 +20,6 @@ export function resetGlobalStorage(): void {
   if (typeof window !== "undefined") {
     (window as unknown as Record<string, unknown>).__IOTA_STORAGE__ = undefined;
   }
-  console.log("🔄 Global storage reset");
 }
 
 export function hasGlobalStorage(): boolean {

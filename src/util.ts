@@ -20,14 +20,10 @@ let globalStorage: Storage | null = null;
 export async function initIdentity(): Promise<void> {
   try {
     if (!wasmModule) {
-      console.log("Loading IOTA Identity WASM module...");
       wasmModule = await initializeEnvironment();
-      console.log("✅ WASM module initialized");
     }
 
-    console.log("Initializing IOTA Identity WASM...");
     await init();
-    console.log("✅ IOTA Identity WASM initialized");
   } catch (error: unknown) {
     console.error("❌ Error initializing IOTA Identity:", error);
     throw error instanceof Error ? error : new Error(String(error));
@@ -37,7 +33,6 @@ export async function initIdentity(): Promise<void> {
 export function getMemstorage(): Storage {
   if (!globalStorage) {
     globalStorage = new Storage(new JwkMemStore(), new KeyIdMemStore());
-    console.log("✅ Created new session storage");
   }
   return globalStorage;
 }
@@ -48,8 +43,6 @@ export async function createIdentityWithClient(): Promise<{
   fragment: string;
 }> {
   try {
-    console.log("🔐 Creating identity with cryptographic keys (v1.4.0)...");
-
     if (!wasmModule) {
       wasmModule = await initializeEnvironment();
     }
@@ -72,8 +65,6 @@ export async function createIdentityWithClient(): Promise<{
 
     const document = IotaDocument.newWithId(did);
 
-    console.log("📝 Generating Ed25519 verification method...");
-
     try {
       const fragment = await document.generateMethod(
         storage,
@@ -83,21 +74,12 @@ export async function createIdentityWithClient(): Promise<{
         MethodScope.VerificationMethod(),
       );
 
-      console.log("✅ Identity created with REAL keys!");
-      console.log("🆔 DID:", document.id().toString());
-      console.log("🔑 Key fragment:", fragment);
-      console.log("✨ Ready for SIGNED credentials (alg: EdDSA)");
-
       return {
         document,
         storage,
         fragment,
       };
     } catch {
-      console.warn("⚠️  Key generation not supported, using simple identity");
-      console.log("✅ DID Document created:", document.id().toString());
-      console.log("ℹ️  Will use unsigned JWT credentials");
-
       return {
         document,
         storage,
@@ -121,7 +103,6 @@ export function getIdentityStorage(): Storage {
 
 export function saveDocument(doc: Document): void {
   try {
-    console.log("Storing DID Document...");
     const documents = loadDocuments();
 
     const iotaDoc = doc as Document;
@@ -137,14 +118,8 @@ export function saveDocument(doc: Document): void {
       };
       documents.push(stored);
       localStorage.setItem("stored-documents", JSON.stringify(documents));
-      console.log(
-        "✅ DID Document stored successfully in browser local storage",
-      );
-    } else {
-      console.log("ℹ️ Document already exists in storage");
     }
   } catch (error: unknown) {
-    console.error("❌ Error storing DID Document:", error);
     throw error instanceof Error ? error : new Error(String(error));
   }
 }
