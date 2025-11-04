@@ -27,3 +27,11 @@ yarn-error.log
 
 # VS Code
 .vscode/
+
+# ngrok
+ngrok.log
+.ngrok_pid
+
+# Temporary files
+*.log
+.DS_Store

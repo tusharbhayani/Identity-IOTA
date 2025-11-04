@@ -35,14 +35,10 @@ export async function createPresentation(
   presentationData: PresentationData,
 ): Promise<Jwt> {
   try {
-    console.log("🔐 Creating SIGNED verifiable presentation...");
-
     const presentation = new Presentation({
       holder: holderDocument.id(),
       verifiableCredential: presentationData.verifiableCredentials,
     });
-
-    console.log("✍️  Signing presentation with Ed25519 key...");
 
     try {
       const { JwsSignatureOptions, JwtPresentationOptions } = await import(
@@ -61,15 +57,8 @@ export async function createPresentation(
         presentationOptions,
       );
 
-      console.log("✅ Presentation SIGNED successfully with EdDSA!");
-      console.log("🔒 JWT has cryptographic signature (alg: EdDSA)");
-
       return presentationJwt;
     } catch (signError) {
-      console.error("❌ Signing failed, falling back to unsigned:", signError);
-
-      console.log("⚠️  Creating unsigned JWT (alg: 'none')...");
-
       const header = { alg: "none", typ: "JWT" };
       const payload = {
         iss: presentation.holder().toString(),
@@ -110,8 +99,6 @@ export async function verifyPresentation(
   credentialsValid: boolean;
 }> {
   try {
-    console.log("Verifying presentation...");
-
     const jwtString = presentationJwt.toString();
     const parts = jwtString.split(".");
 
@@ -129,10 +116,6 @@ export async function verifyPresentation(
     const payload = base64UrlDecode(parts[1]);
 
     if (header.alg === "none") {
-      console.log(
-        "ℹ️  Verifying unsigned presentation (structure validation only)",
-      );
-
       if (!payload.vp) {
         throw new Error("Invalid presentation structure");
       }
@@ -147,20 +130,11 @@ export async function verifyPresentation(
         throw new Error("Presentation expired");
       }
 
-      console.log("✅ Presentation structure validated (unsigned)");
-
-      const credentials = presentation.verifiableCredential();
-      console.log(
-        `ℹ️  Presentation contains ${credentials.length} credential(s)`,
-      );
-
       return {
         presentation,
         credentialsValid: true,
       };
     }
-
-    console.log("ℹ️  Attempting cryptographic verification...");
 
     const validationOptions = challenge
       ? new JwtPresentationValidationOptions({
@@ -177,9 +151,6 @@ export async function verifyPresentation(
       validationOptions,
     );
 
-    console.log("✅ Presentation signature verified");
-
-    console.log("Verifying embedded credentials...");
     const presentation = decodedPresentation.presentation();
 
     const credentialValidator = new JwtCredentialValidator(
@@ -211,9 +182,7 @@ export async function verifyPresentation(
           credentialOptions,
           FailFast.FirstError,
         );
-        console.log(`✅ Credential ${i + 1} verified`);
       } catch (error) {
-        console.error(`❌ Credential ${i + 1} verification failed:`, error);
         allCredentialsValid = false;
       }
     }
@@ -242,9 +211,8 @@ export function storePresentation(jwt: Jwt, presentation: Presentation): void {
 
     presentations.push(storedPresentation);
     localStorage.setItem("iota-presentations", JSON.stringify(presentations));
-    console.log("✅ Presentation stored locally");
   } catch (error) {
-    console.error("❌ Error storing presentation:", error);
+    console.error("Error storing presentation:", error);
     throw error;
   }
 }
@@ -261,5 +229,4 @@ export function loadPresentations(): StoredPresentation[] {
 
 export function clearPresentations(): void {
   localStorage.removeItem("iota-presentations");
-  console.log("✅ All presentations cleared");
 }

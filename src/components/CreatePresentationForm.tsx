@@ -162,7 +162,6 @@ export function CreatePresentationForm({
                         </Text>
                     </Box>
 
-                    {/* Expiration */}
                     <Box>
                         <Text size="2" weight="bold" mb="2">
                             Expiration (minutes)
@@ -180,7 +179,6 @@ export function CreatePresentationForm({
                         </Text>
                     </Box>
 
-                    {/* Error Message */}
                     {error && (
                         <Box
                             p="3"

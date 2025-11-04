@@ -12,11 +12,6 @@ export async function initializeEnvironment(): Promise<IotaModule> {
   try {
     const identity = await initializeWasm();
 
-    console.log(
-      "Identity module loaded, available exports:",
-      Object.keys(identity),
-    );
-
     wasmModule = {
       init: identity.init,
       IotaIdentityClient: identity.IotaIdentityClient,
@@ -25,12 +20,6 @@ export async function initializeEnvironment(): Promise<IotaModule> {
       VerificationMethod: identity.VerificationMethod,
       initialized: true,
     };
-
-    console.log("WASM module structure created:", {
-      hasClient: !!wasmModule.IotaIdentityClient,
-      hasDocument: !!wasmModule.IotaDocument,
-      hasStorage: !!wasmModule.Storage,
-    });
 
     return wasmModule;
   } catch (error) {

@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
-import ErrorBoundary from "./components/ErrorBoundary";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initializeEnvironment } from "./init";
 import "./styles/responsive.css";
 
@@ -31,9 +31,7 @@ root.render(
 
 (async () => {
   try {
-    console.log("Main: Starting app initialization...");
     await initializeEnvironment();
-    console.log("Main: WASM initialized, rendering app...");
 
     root.render(
       <React.StrictMode>
