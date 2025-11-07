@@ -72,7 +72,7 @@ export const IdentityDashboard: React.FC<IdentityDashboardProps> = ({
         <Box>
             <Flex direction="column" gap="6">
                 <Box>
-                    <Heading size="5">📊 Identity Dashboard</Heading>
+                    <Heading size="5">Identity Dashboard</Heading>
                     <Text color="gray">Overview of your digital identity and credentials</Text>
                 </Box>
 

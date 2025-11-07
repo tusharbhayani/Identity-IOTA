@@ -83,7 +83,7 @@ export function SSIAgentStatus() {
                     <Flex justify="between" align="center">
                         <Text size="2">UniCore Service (Port 3033):</Text>
                         <Badge color={status.api ? "green" : "red"}>
-                            {status.api ? "✅ Connected" : "❌ Disconnected"}
+                            {status.api ? "Connected" : "Disconnected"}
                         </Badge>
                     </Flex>
 
@@ -95,7 +95,7 @@ export function SSIAgentStatus() {
 
                     {status.error && (
                         <Box p="3" style={{ background: 'var(--red-3)', borderRadius: '4px' }}>
-                            <Text size="2" color="red" weight="bold">❌ {status.error}</Text>
+                            <Text size="2" color="red" weight="bold">{status.error}</Text>
                             <Text size="1" color="red" style={{ display: 'block', marginTop: '4px' }}>
                                 📖 Start UniCore service on port 3033
                             </Text>
@@ -109,16 +109,16 @@ export function SSIAgentStatus() {
                         onClick={testCredentialFlow}
                         disabled={isLoading}
                     >
-                        {isLoading ? "Testing..." : "🧪 Test UniCore Flow"}
+                        {isLoading ? "Testing..." : "Test UniCore Flow"}
                     </Button>
 
                     {testResult && (
                         <Box p="3" style={{ background: testResult.success ? 'var(--green-3)' : 'var(--red-3)', borderRadius: '4px' }}>
                             {testResult.error ? (
-                                <Text size="2" color="red">❌ Test failed: {testResult.error}</Text>
+                                <Text size="2" color="red">Test failed: {testResult.error}</Text>
                             ) : (
                                 <Flex direction="column" gap="1">
-                                    <Text size="2" color="green">✅ Test successful!</Text>
+                                    <Text size="2" color="green">Test successful!</Text>
                                     <Text size="1" color="gray">Status: {testResult.status}</Text>
                                     {testResult.qrCodeUrl && (
                                         <Text size="1" color="gray">QR Code generated</Text>
@@ -133,7 +133,7 @@ export function SSIAgentStatus() {
                     <Text size="1" color="gray">
                         {status.api ?
                             "🔗 Connected to UniCore service - Ready for credentials!" :
-                            "⚠️ Start UniCore service on port 3033"
+                            "Start UniCore service on port 3033"
                         }
                     </Text>
                 </Box>

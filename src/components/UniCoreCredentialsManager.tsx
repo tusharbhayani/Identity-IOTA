@@ -43,7 +43,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [healthStatus, setHealthStatus] = useState<{ api: boolean; error?: string } | null>(null);
 
-    // Load credentials from localStorage on mount
     useEffect(() => {
         const stored = localStorage.getItem('unicore-credentials');
         if (stored) {
@@ -54,11 +53,9 @@ export const UniCoreCredentialsManager: React.FC = () => {
             }
         }
 
-        // Check health status
         checkHealth();
     }, []);
 
-    // Save credentials to localStorage whenever they change
     useEffect(() => {
         localStorage.setItem('unicore-credentials', JSON.stringify(issuedCredentials));
     }, [issuedCredentials]);
@@ -85,7 +82,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
         setForm(prev => ({
             ...prev,
             type,
-            // Reset type-specific fields
             employerId: '',
             position: '',
             validUntil: '',
@@ -135,7 +131,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     form.validUntil!
                 );
             } else {
-                // Generic credential
                 result = await unicoreService.issueCredential({
                     type: form.type,
                     credentialSubject: {
@@ -160,7 +155,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                 setIssuedCredentials(prev => [newCredential, ...prev]);
                 setSuccess(`${form.type} credential issued successfully! Scan the QR code with UniMe wallet.`);
 
-                // Reset form
                 setForm({
                     type: 'MigrationIdentity',
                     firstName: '',
@@ -211,7 +205,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     UniCore Credentials Manager
                 </h2>
 
-                {/* Health Status */}
                 <div className="mb-4 p-3 rounded-md bg-gray-50">
                     <div className="flex items-center justify-between">
                         <span className="font-medium">UniCore Service Status:</span>
@@ -233,7 +226,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     )}
                 </div>
 
-                {/* Credential Type Selection */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Credential Type
@@ -250,7 +242,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     </select>
                 </div>
 
-                {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,7 +295,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Type-specific fields */}
                 {(form.type === 'MigrationIdentity' || form.type === 'WorkPermit') && (
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -362,7 +352,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3 mb-4">
                     <button
                         onClick={issueCredential}
@@ -390,7 +379,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                     )}
                 </div>
 
-                {/* Status Messages */}
                 {error && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 mb-4">
                         {error}
@@ -404,7 +392,6 @@ export const UniCoreCredentialsManager: React.FC = () => {
                 )}
             </div>
 
-            {/* Issued Credentials */}
             {issuedCredentials.length > 0 && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h3 className="text-xl font-bold text-gray-800 mb-4">

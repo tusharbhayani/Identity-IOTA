@@ -34,10 +34,6 @@ import {
 import { unicoreService } from '../services/unicore/unicoreService';
 import { QRCodeGenerator } from './QRCodeGenerator';
 
-// ============================================================================
-// TYPES AND INTERFACES
-// ============================================================================
-
 interface CredentialForm {
     type: string;
     firstName: string;
@@ -45,16 +41,13 @@ interface CredentialForm {
     dateOfBirth: string;
     nationality: string;
     passportNumber?: string;
-    // Work Permit fields
     employerId?: string;
     position?: string;
     validUntil?: string;
-    // Health Record fields
     healthRecordId?: string;
     vaccinationStatus?: string;
     bloodType?: string;
     allergies?: string;
-    // Skill Certification fields
     certificationName?: string;
     certificationLevel?: string;
     issuingOrganization?: string;
@@ -86,19 +79,13 @@ interface ServiceHealth {
     error?: string;
 }
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 export const ModernCredentialsManager: React.FC = () => {
-    // State management
     const [activeTab, setActiveTab] = useState('issue');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [healthStatus, setHealthStatus] = useState<ServiceHealth | null>(null);
 
-    // Credential issuance state
     const [form, setForm] = useState<CredentialForm>({
         type: 'VerifiableCredential',
         firstName: '',
@@ -108,19 +95,13 @@ export const ModernCredentialsManager: React.FC = () => {
         passportNumber: '',
     });
 
-    // Credentials and verification state
     const [issuedCredentials, setIssuedCredentials] = useState<IssuedCredential[]>([]);
     const [verificationRequests, setVerificationRequests] = useState<VerificationRequest[]>([]);
     const [selectedCredential, setSelectedCredential] = useState<IssuedCredential | null>(null);
     const [showQRDialog, setShowQRDialog] = useState(false);
     const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
-    // Verification form state
     const [verificationTypes, setVerificationTypes] = useState<string[]>(['VerifiableCredential']);
-
-    // ============================================================================
-    // LIFECYCLE AND EFFECTS
-    // ============================================================================
 
     useEffect(() => {
         loadStoredData();
@@ -134,10 +115,6 @@ export const ModernCredentialsManager: React.FC = () => {
     useEffect(() => {
         localStorage.setItem('unicore-verifications', JSON.stringify(verificationRequests));
     }, [verificationRequests]);
-
-    // ============================================================================
-    // DATA MANAGEMENT
-    // ============================================================================
 
     const loadStoredData = () => {
         try {
@@ -160,12 +137,10 @@ export const ModernCredentialsManager: React.FC = () => {
             const health = await unicoreService.healthCheck();
             setHealthStatus(health);
 
-            // Also get available configuration IDs
             const configIds = await unicoreService.getAvailableConfigurationIds();
-            console.log('📋 Available credential configuration IDs:', configIds);
 
             if (configIds.length === 0) {
-                setError('⚠️ No credential configurations found in UniCore. Please configure credential types first.');
+                setError('No credential configurations found in UniCore. Please configure credential types first.');
             }
 
             if (health.configurations) {
@@ -180,10 +155,6 @@ export const ModernCredentialsManager: React.FC = () => {
         }
     };
 
-    // ============================================================================
-    // FORM HANDLING
-    // ============================================================================
-
     const handleInputChange = (field: keyof CredentialForm, value: string) => {
         setForm(prev => ({ ...prev, [field]: value }));
         clearMessages();
@@ -193,7 +164,6 @@ export const ModernCredentialsManager: React.FC = () => {
         setForm(prev => ({
             ...prev,
             type,
-            // Reset all type-specific fields
             employerId: '',
             position: '',
             validUntil: '',
@@ -213,10 +183,6 @@ export const ModernCredentialsManager: React.FC = () => {
         setError(null);
         setSuccess(null);
     };
-
-    // ============================================================================
-    // CREDENTIAL ISSUANCE FLOW
-    // ============================================================================
 
     const validateForm = (): boolean => {
         if (!form.firstName.trim() || !form.lastName.trim() || !form.dateOfBirth || !form.nationality.trim()) {
@@ -255,7 +221,6 @@ export const ModernCredentialsManager: React.FC = () => {
         clearMessages();
 
         try {
-            // Create credential request based on form data
             const credentialRequest = {
                 type: form.type,
                 credentialSubject: {
@@ -263,18 +228,14 @@ export const ModernCredentialsManager: React.FC = () => {
                     last_name: form.lastName,
                     dob: form.dateOfBirth,
                     nationality: form.nationality,
-                    // Common optional field
                     ...(form.passportNumber && { passport_number: form.passportNumber }),
-                    // Work Permit fields
                     ...(form.employerId && { employer_id: form.employerId }),
                     ...(form.position && { position: form.position }),
                     ...(form.validUntil && { valid_until: form.validUntil }),
-                    // Health Record fields
                     ...(form.healthRecordId && { health_record_id: form.healthRecordId }),
                     ...(form.vaccinationStatus && { vaccination_status: form.vaccinationStatus }),
                     ...(form.bloodType && { blood_type: form.bloodType }),
                     ...(form.allergies && { allergies: form.allergies }),
-                    // Skill Certification fields
                     ...(form.certificationName && { certification_name: form.certificationName }),
                     ...(form.certificationLevel && { certification_level: form.certificationLevel }),
                     ...(form.issuingOrganization && { issuing_organization: form.issuingOrganization }),
@@ -297,9 +258,8 @@ export const ModernCredentialsManager: React.FC = () => {
                 };
 
                 setIssuedCredentials(prev => [newCredential, ...prev]);
-                setSuccess(`${form.type} credential issued successfully! 🎉`);
+                setSuccess(`${form.type} credential issued successfully!`);
 
-                // Reset form
                 setForm({
                     type: 'MigrationIdentity',
                     firstName: '',
@@ -321,7 +281,6 @@ export const ModernCredentialsManager: React.FC = () => {
                     issueDate: '',
                 });
 
-                // Auto-show QR code for new credential
                 setSelectedCredential(newCredential);
                 setShowQRDialog(true);
             } else {
@@ -333,10 +292,6 @@ export const ModernCredentialsManager: React.FC = () => {
             setIsLoading(false);
         }
     };
-
-    // ============================================================================
-    // VERIFICATION FLOW
-    // ============================================================================
 
     const createVerificationRequest = async () => {
         if (verificationTypes.length === 0) {
@@ -360,9 +315,8 @@ export const ModernCredentialsManager: React.FC = () => {
                 };
 
                 setVerificationRequests(prev => [newVerification, ...prev]);
-                setSuccess('Verification request created successfully! 🔍');
+                setSuccess('Verification request created successfully!');
 
-                // Auto-show QR code for verification
                 setSelectedCredential({
                     id: newVerification.id,
                     type: 'Verification Request',
@@ -381,10 +335,6 @@ export const ModernCredentialsManager: React.FC = () => {
         }
     };
 
-    // ============================================================================
-    // UI ACTIONS
-    // ============================================================================
-
     const showCredentialQR = (credential: IssuedCredential) => {
         setSelectedCredential(credential);
         setShowQRDialog(true);
@@ -398,7 +348,7 @@ export const ModernCredentialsManager: React.FC = () => {
     const copyToClipboard = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text);
-            setSuccess('Copied to clipboard! 📋');
+            setSuccess('Copied to clipboard!');
         } catch {
             setError('Failed to copy to clipboard');
         }
@@ -422,7 +372,7 @@ export const ModernCredentialsManager: React.FC = () => {
             const result = await unicoreService.testUniCoreFlow();
 
             if (result.success) {
-                setSuccess('UniCore flow test completed successfully! ✅');
+                setSuccess('UniCore flow test completed successfully!');
             } else {
                 setError(result.error || 'UniCore flow test failed');
             }
@@ -432,10 +382,6 @@ export const ModernCredentialsManager: React.FC = () => {
             setIsLoading(false);
         }
     };
-
-    // ============================================================================
-    // RENDER HELPERS
-    // ============================================================================
 
     const renderHealthStatus = () => (
         <Card size="2" style={{ marginBottom: '1rem' }}>
@@ -714,23 +660,16 @@ export const ModernCredentialsManager: React.FC = () => {
         </Card>
     );
 
-    // ============================================================================
-    // MAIN RENDER
-    // ============================================================================
-
     return (
         <Box style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-            {/* Header */}
             <Flex direction="column" gap="4" style={{ marginBottom: '2rem' }}>
                 <Heading size="6">🎯 UniCore Credentials Manager</Heading>
                 <Text color="gray">
                     Complete credential issuance, verification, and management with all 18 UniCore APIs
                 </Text>
 
-                {/* Health Status */}
                 {renderHealthStatus()}
 
-                {/* Status Messages */}
                 {error && (
                     <Card size="2" style={{ backgroundColor: 'var(--red-2)', border: '1px solid var(--red-6)' }}>
                         <Flex align="center" gap="2">
@@ -750,21 +689,18 @@ export const ModernCredentialsManager: React.FC = () => {
                 )}
             </Flex>
 
-            {/* Main Tabs */}
             <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
                 <Tabs.List size="2">
-                    <Tabs.Trigger value="issue">🎫 Issue Credentials</Tabs.Trigger>
-                    <Tabs.Trigger value="verify">🔍 Verify Credentials</Tabs.Trigger>
-                    <Tabs.Trigger value="manage">📋 Manage</Tabs.Trigger>
+                    <Tabs.Trigger value="issue">Issue Credentials</Tabs.Trigger>
+                    <Tabs.Trigger value="verify">Verify Credentials</Tabs.Trigger>
+                    <Tabs.Trigger value="manage">Manage</Tabs.Trigger>
                 </Tabs.List>
 
-                {/* Issue Credentials Tab */}
                 <Tabs.Content value="issue">
                     <Card size="3" style={{ marginTop: '1rem' }}>
                         <Flex direction="column" gap="4">
                             <Heading size="4">Issue New Credential</Heading>
 
-                            {/* Credential Type Selection */}
                             <Box>
                                 <Text size="2" weight="medium" style={{ display: 'block', marginBottom: '0.5rem' }}>
                                     Credential Type
@@ -781,7 +717,6 @@ export const ModernCredentialsManager: React.FC = () => {
                                 </Select.Root>
                             </Box>
 
-                            {/* Basic Information */}
                             <Grid columns="2" gap="3">
                                 <Box>
                                     <Text size="2" weight="medium" style={{ display: 'block', marginBottom: '0.5rem' }}>
@@ -828,7 +763,6 @@ export const ModernCredentialsManager: React.FC = () => {
                                 </Box>
                             </Grid>
 
-                            {/* Passport Number (for applicable types) */}
                             {(form.type === 'MigrationIdentity' || form.type === 'WorkPermit') && (
                                 <Box>
                                     <Text size="2" weight="medium" style={{ display: 'block', marginBottom: '0.5rem' }}>
@@ -842,10 +776,8 @@ export const ModernCredentialsManager: React.FC = () => {
                                 </Box>
                             )}
 
-                            {/* Type-specific fields */}
                             {renderCredentialTypeFields()}
 
-                            {/* Issue Button */}
                             <Button
                                 size="3"
                                 onClick={issueCredential}
@@ -859,13 +791,11 @@ export const ModernCredentialsManager: React.FC = () => {
                     </Card>
                 </Tabs.Content>
 
-                {/* Verify Credentials Tab */}
                 <Tabs.Content value="verify">
                     <Card size="3" style={{ marginTop: '1rem' }}>
                         <Flex direction="column" gap="4">
                             <Heading size="4">Create Verification Request</Heading>
 
-                            {/* Option 1: Verify by Type */}
                             <Box>
                                 <Text size="3" weight="bold" style={{ display: 'block', marginBottom: '1rem' }}>
                                     Option 1: Verify by Credential Type
@@ -903,7 +833,6 @@ export const ModernCredentialsManager: React.FC = () => {
 
                             <Separator />
 
-                            {/* Option 2: Verify Specific Issued Credential */}
                             {issuedCredentials.length > 0 && (
                                 <Box>
                                     <Text size="3" weight="bold" style={{ display: 'block', marginBottom: '1rem' }}>
@@ -939,7 +868,7 @@ export const ModernCredentialsManager: React.FC = () => {
                                                                         status: 'active',
                                                                     };
                                                                     setVerificationRequests(prev => [newVerification, ...prev]);
-                                                                    setSuccess(`Verification request created for ${credential.type}! 🔍`);
+                                                                    setSuccess(`Verification request created for ${credential.type}!`);
                                                                     setSelectedCredential({
                                                                         id: newVerification.id,
                                                                         type: 'Verification Request',
@@ -968,7 +897,6 @@ export const ModernCredentialsManager: React.FC = () => {
                                 </Box>
                             )}
 
-                            {/* Verification Requests List */}
                             {verificationRequests.length > 0 && (
                                 <Box>
                                     <Separator style={{ margin: '1rem 0' }} />
@@ -987,7 +915,6 @@ export const ModernCredentialsManager: React.FC = () => {
                     </Card>
                 </Tabs.Content>
 
-                {/* Manage Tab */}
                 <Tabs.Content value="manage">
                     <Card size="3" style={{ marginTop: '1rem' }}>
                         <Flex direction="column" gap="4">
@@ -1014,7 +941,6 @@ export const ModernCredentialsManager: React.FC = () => {
                 </Tabs.Content>
             </Tabs.Root>
 
-            {/* QR Code Dialog */}
             <Dialog.Root open={showQRDialog} onOpenChange={setShowQRDialog}>
                 <Dialog.Content style={{ maxWidth: '500px' }}>
                     <Dialog.Title>QR Code - {selectedCredential?.type}</Dialog.Title>
@@ -1047,14 +973,12 @@ export const ModernCredentialsManager: React.FC = () => {
                 </Dialog.Content>
             </Dialog.Root>
 
-            {/* Credential Details Dialog */}
             <Dialog.Root open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
                 <Dialog.Content style={{ maxWidth: '700px' }}>
                     <Dialog.Title>Credential Details</Dialog.Title>
 
                     {selectedCredential && (
                         <Flex direction="column" gap="4" style={{ margin: '1rem 0' }}>
-                            {/* QR Code Section */}
                             <Box style={{ textAlign: 'center', padding: '1rem', backgroundColor: 'var(--gray-2)', borderRadius: '8px' }}>
                                 <Text size="2" weight="bold" style={{ display: 'block', marginBottom: '1rem' }}>
                                     Scan to Claim Credential
@@ -1074,7 +998,6 @@ export const ModernCredentialsManager: React.FC = () => {
                                 </Button>
                             </Box>
 
-                            {/* Credential Data */}
                             <Box>
                                 <Text size="2" weight="bold" style={{ display: 'block', marginBottom: '0.5rem' }}>
                                     Credential Information

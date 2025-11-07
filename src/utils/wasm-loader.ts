@@ -58,7 +58,7 @@ export async function initializeWasm(): Promise<
     return identity;
   } catch (error) {
     window.__IOTA_WASM_INITIALIZING__ = false;
-    console.error("❌ IOTA Identity WASM initialization failed:", error);
+    console.error("IOTA Identity WASM initialization failed:", error);
     console.error("Full error:", JSON.stringify(error, null, 2));
     throw error;
   }

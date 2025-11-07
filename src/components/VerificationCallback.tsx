@@ -33,7 +33,6 @@ export const VerificationCallback: React.FC = () => {
 
     const processCallback = async () => {
         try {
-            // Extract parameters from URL
             const vpToken = searchParams.get('vp_token');
             const presentationSubmission = searchParams.get('presentation_submission');
             const state = searchParams.get('state');
@@ -52,7 +51,6 @@ export const VerificationCallback: React.FC = () => {
 
             setResponse(callbackResponse);
 
-            // Check for errors
             if (error) {
                 setVerificationResult({
                     success: false,
@@ -62,22 +60,10 @@ export const VerificationCallback: React.FC = () => {
                 return;
             }
 
-            // Verify the presentation
             if (vpToken) {
-                console.log('📥 Received VP Token:', vpToken);
-                console.log('📋 Presentation Submission:', presentationSubmission);
-                console.log('🔑 State:', state);
 
-                // Here you would typically:
-                // 1. Verify the VP token signature
-                // 2. Check the presentation submission
-                // 3. Validate the credentials
-                // 4. Store the verification result
-
-                // For now, we'll just decode and display
                 try {
                     const decoded = decodeJWT(vpToken);
-                    console.log('✅ Decoded VP:', decoded);
 
                     setVerificationResult({
                         success: true,
@@ -97,7 +83,7 @@ export const VerificationCallback: React.FC = () => {
                 });
             }
         } catch (err) {
-            console.error('❌ Failed to process callback:', err);
+            console.error('Failed to process callback:', err);
             setVerificationResult({
                 success: false,
                 message: err instanceof Error ? err.message : 'Unknown error',
@@ -144,7 +130,6 @@ export const VerificationCallback: React.FC = () => {
         <Box style={{ maxWidth: '600px', margin: '2rem auto', padding: '1rem' }}>
             <Card size="3">
                 <Flex direction="column" gap="4">
-                    {/* Header */}
                     <Flex align="center" gap="3">
                         {verificationResult?.success ? (
                             <CheckIcon width="32" height="32" color="var(--green-11)" />
@@ -156,7 +141,6 @@ export const VerificationCallback: React.FC = () => {
                         </Heading>
                     </Flex>
 
-                    {/* Status Badge */}
                     <Badge
                         size="2"
                         color={verificationResult?.success ? 'green' : 'red'}
@@ -165,10 +149,8 @@ export const VerificationCallback: React.FC = () => {
                         {verificationResult?.success ? 'Verified' : 'Failed'}
                     </Badge>
 
-                    {/* Message */}
                     <Text size="3">{verificationResult?.message}</Text>
 
-                    {/* Response Details */}
                     {response && (
                         <Box>
                             <Text size="2" weight="bold" style={{ display: 'block', marginBottom: '0.5rem' }}>
@@ -190,7 +172,6 @@ export const VerificationCallback: React.FC = () => {
                         </Box>
                     )}
 
-                    {/* Decoded VP Details */}
                     {verificationResult?.details && (
                         <Box>
                             <Text size="2" weight="bold" style={{ display: 'block', marginBottom: '0.5rem' }}>
@@ -212,7 +193,6 @@ export const VerificationCallback: React.FC = () => {
                         </Box>
                     )}
 
-                    {/* Actions */}
                     <Flex gap="3" justify="end">
                         <Button onClick={goBack}>Back to Dashboard</Button>
                     </Flex>

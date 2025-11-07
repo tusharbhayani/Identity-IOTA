@@ -3,42 +3,34 @@
  * Complete credential management system with professional UI
  */
 
-import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Card,
-    Flex,
-    Heading,
-    Text,
-    Button,
-    TextField,
-    Select,
-    Badge,
-    Separator,
-    Tabs,
-    Dialog,
-    ScrollArea,
-    Grid,
-    Avatar,
-    IconButton,
-    Callout,
-} from '@radix-ui/themes';
-import {
-    PlusIcon,
+    CheckCircledIcon,
     CheckIcon,
     Cross2Icon,
-    EyeOpenIcon,
-    Share1Icon,
-    ReloadIcon,
-    InfoCircledIcon,
-    CheckCircledIcon,
     ExclamationTriangleIcon,
+    EyeOpenIcon,
+    InfoCircledIcon,
+    ReloadIcon,
+    Share1Icon
 } from '@radix-ui/react-icons';
-import { unicoreService } from '../services/unicore/unicoreService';
-import { QRCodeGenerator } from './QRCodeGenerator';
+import {
+    Avatar,
+    Badge,
+    Box,
+    Button,
+    Callout,
+    Card,
+    Flex,
+    Grid,
+    Heading,
+    IconButton,
+    Text,
+    TextField
+} from '@radix-ui/themes';
+import React, { useEffect, useState } from 'react';
 import { getCredentialDisplayName } from '../services/unicore/credentialConfigService';
+import { unicoreService } from '../services/unicore/unicoreService';
 
-// ... (keeping all the existing interfaces and types from ModernCredentialsManager)
 
 interface CredentialForm {
     type: string;
@@ -77,8 +69,6 @@ interface ServiceHealth {
 }
 
 export const EnhancedCredentialsManager: React.FC = () => {
-    // ... (keeping all the existing state management)
-    const [activeTab, setActiveTab] = useState('issue');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -135,12 +125,11 @@ export const EnhancedCredentialsManager: React.FC = () => {
             setHealthStatus(health);
 
             const configIds = await unicoreService.getAvailableConfigurationIds();
-            console.log('📋 Available credential configuration IDs:', configIds);
 
             if (configIds.length === 0) {
-                setError('⚠️ No credential configurations found in UniCore. Please configure credential types first. See UNICORE_SETUP_GUIDE.md');
+                setError('No credential configurations found in UniCore. Please configure credential types first. See UNICORE_SETUP_GUIDE.md');
             } else if (configIds.length === 1 && configIds[0] === 'VerifiableCredential') {
-                console.warn('⚠️ Only generic VerifiableCredential configuration found. Add specific types for better wallet display.');
+                console.warn('Only generic VerifiableCredential configuration found. Add specific types for better wallet display.');
             }
 
             if (health.configurations) {
@@ -226,7 +215,7 @@ export const EnhancedCredentialsManager: React.FC = () => {
                 };
 
                 setIssuedCredentials(prev => [newCredential, ...prev]);
-                setSuccess(`${getCredentialDisplayName(form.type)} issued successfully! 🎉 Scan the QR code with your wallet.`);
+                setSuccess(`${getCredentialDisplayName(form.type)} issued successfully! Scan the QR code with your wallet.`);
 
                 setForm({
                     type: 'MigrationIdentity',
@@ -271,7 +260,7 @@ export const EnhancedCredentialsManager: React.FC = () => {
                 };
 
                 setVerificationRequests(prev => [newVerification, ...prev]);
-                setSuccess('Verification request created successfully! 🔍');
+                setSuccess('Verification request created successfully!');
 
                 setSelectedCredential({
                     id: newVerification.id,
@@ -304,7 +293,7 @@ export const EnhancedCredentialsManager: React.FC = () => {
     const copyToClipboard = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text);
-            setSuccess('Copied to clipboard! 📋');
+            setSuccess('Copied to clipboard!');
         } catch {
             setError('Failed to copy to clipboard');
         }
@@ -332,7 +321,7 @@ export const EnhancedCredentialsManager: React.FC = () => {
             const result = await unicoreService.testUniCoreFlow();
 
             if (result.success) {
-                setSuccess('UniCore flow test completed successfully! ✅');
+                setSuccess('UniCore flow test completed successfully!');
             } else {
                 setError(result.error || 'UniCore flow test failed');
             }
@@ -550,10 +539,6 @@ export const EnhancedCredentialsManager: React.FC = () => {
                 </Card>
             </Flex>
 
-            {/* Rest of the component - keeping the same tab structure from ModernCredentialsManager */}
-            {/* ... (Issue, Verify, Manage tabs with the same content) */}
-
-            {/* QR Code and Details dialogs - keeping the same from ModernCredentialsManager */}
         </Box>
     );
 };

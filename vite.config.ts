@@ -26,16 +26,13 @@ export default defineConfig({
       allow: [".."],
     },
     proxy: {
-      // Handle fixed offer endpoints first
       "/api/fixed-offer": {
         target: "http://localhost:5173",
         changeOrigin: false,
         configure: (proxy, options) => {
           proxy.on("proxyReq", (proxyReq, req, res) => {
-            // Intercept fixed offer requests and serve fixed data
             const offerId = req.url?.split("/").pop();
 
-            // Get fixed offer data from global storage
             const fixedOffers = (global as unknown).fixedOffers || {};
             const fixedData = fixedOffers[offerId || ""];
 
@@ -50,13 +47,11 @@ export default defineConfig({
               return;
             }
 
-            // If no fixed data found, return 404
             res.writeHead(404, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Fixed offer not found" }));
           });
         },
       },
-      // Default proxy to SSI Agent for all other /api requests
       "/api": {
         target: "http://192.168.29.111:3033",
         changeOrigin: true,

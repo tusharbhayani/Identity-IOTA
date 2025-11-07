@@ -19,11 +19,11 @@ function App() {
       try {
         setStatus('Initializing IOTA Identity Client...');
         await initIdentity();
-        setStatus('✅ IOTA Identity Client initialized and ready!');
+        setStatus('IOTA Identity Client initialized and ready!');
       } catch (err) {
         console.error("Failed to initialize IOTA Identity:", err);
         setError(err instanceof Error ? err.message : String(err));
-        setStatus('❌ Failed to initialize');
+        setStatus('Failed to initialize');
       }
     };
 
@@ -46,7 +46,6 @@ function App() {
         <Container size="4" style={{ minHeight: '100vh', padding: '2rem' }}>
           <ErrorBoundary>
             <Routes>
-              {/* Main Dashboard */}
               <Route
                 path="/"
                 element={
@@ -58,7 +57,7 @@ function App() {
                       </Text>
                       {error && (
                         <Box mt="3" p="3" style={{ background: 'var(--red-3)', borderRadius: '8px' }}>
-                          <Text color="red" weight="bold">❌ Error: {error}</Text>
+                          <Text color="red" weight="bold">Error: {error}</Text>
                         </Box>
                       )}
                       {status && (
@@ -73,7 +72,6 @@ function App() {
                 }
               />
 
-              {/* Verification Callback */}
               <Route path="/verification/callback" element={<VerificationCallback />} />
             </Routes>
           </ErrorBoundary>
