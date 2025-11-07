@@ -11,9 +11,7 @@
     "format": "prettier -w .",
     "clean": "rm -rf node_modules pnpm-lock.yaml .vite dist",
     "reset": "pnpm clean && pnpm install",
-    "dev:build": "pnpm build && pnpm preview",
-    "serve": "node server.js",
-    "credential-server": "node minimal-credential-server.js",
+    "dev:build": "pnpm build && pnpm preview"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -33,6 +31,7 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.1",
     "base64-js": "^1.5.1",
+    "bs58": "^6.0.0",
     "cors": "^2.8.5",
     "js-base64": "^3.7.5",
     "postcss": "^8.5.6",
