@@ -1,37 +1,38 @@
-# OSX
-#
-.DS_Store
-
-# node.js
-#
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
+# Production builds
+dist/
+build/
 
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
-
-# testing
-/coverage
+# Environment variables
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# VS Code
+# IDE files
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# ngrok
-ngrok.log
-.ngrok_pid
-
-# Temporary files
-*.log
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Server keys (keep secure)
+.server-keys.json
+
+# Logs
+logs/
+*.log

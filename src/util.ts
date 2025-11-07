@@ -25,7 +25,6 @@ export async function initIdentity(): Promise<void> {
 
     await init();
   } catch (error: unknown) {
-    console.error("❌ Error initializing IOTA Identity:", error);
     throw error instanceof Error ? error : new Error(String(error));
   }
 }
@@ -87,7 +86,6 @@ export async function createIdentityWithClient(): Promise<{
       };
     }
   } catch (error: unknown) {
-    console.error("❌ Error creating identity:", error);
     throw error instanceof Error ? error : new Error(String(error));
   }
 }
@@ -129,7 +127,6 @@ export function loadDocuments(): StoredDocument[] {
     const stored = localStorage.getItem("stored-documents");
     return stored ? JSON.parse(stored) : [];
   } catch (error: unknown) {
-    console.error("❌ Error retrieving DID Documents:", error);
     return [];
   }
 }
@@ -149,7 +146,6 @@ export async function loadDocument(): Promise<Document | null> {
     const docJson = JSON.parse(latest.document);
     return wasmModule.IotaDocument.fromJSON(docJson);
   } catch (error: unknown) {
-    console.error("❌ Error loading DID Document:", error);
     return null;
   }
 }
