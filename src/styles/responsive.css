@@ -163,7 +163,6 @@
   }
 }
 
-/* Improve touch targets for mobile */
 @media (max-width: 768px) {
   .rt-Button {
     min-height: 40px !important;
@@ -176,14 +175,12 @@
   }
 }
 
-/* Scrollable content improvements */
 @media (max-width: 768px) {
   .rt-Box[style*="maxHeight"][style*="overflow: auto"] {
     max-height: 50vh !important;
   }
 }
 
-/* Select dropdown improvements */
 @media (max-width: 768px) {
   .rt-Select-Trigger {
     font-size: 14px !important;
@@ -191,7 +188,6 @@
   }
 }
 
-/* Copy button improvements */
 @media (max-width: 768px) {
   .rt-Button[aria-label*="copy"],
   .rt-Button:has(span:contains("📋")),
@@ -201,9 +197,7 @@
   }
 }
 
-/* Layout improvements for component combinations */
 @media (max-width: 768px) {
-  /* When wallet and QR are displayed together */
   .component-pair {
     display: flex !important;
     flex-direction: column !important;
@@ -216,7 +210,6 @@
   }
 }
 
-/* Print styles for QR codes */
 @media print {
   .qr-generator {
     break-inside: avoid;
@@ -228,7 +221,6 @@
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .rt-Card {
     border: 2px solid !important;
@@ -239,7 +231,6 @@
   }
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
