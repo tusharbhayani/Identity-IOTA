@@ -1,4 +1,4 @@
-# IOTA Identity SSI Demo Application
+# Borderless Identity Application
 
 A comprehensive Self-Sovereign Identity (SSI) demonstration using IOTA Identity with support for W3C Verifiable Credentials, presentations, and wallet invitation URLs.
 
@@ -63,15 +63,6 @@ pnpm build
 5. Share the generated QR code or URL
 6. Monitor responses in the invitation history
 
-## 🏗️ API Endpoints
-
-The backend provides several endpoints for wallet integration:
-
-- `GET /api/invitations/credential-offer?invitation_id={id}` - Retrieve credential offer
-- `GET /api/invitations/presentation-request?invitation_id={id}` - Retrieve presentation request
-- `POST /api/invitations/presentation-response` - Receive presentation responses
-- `POST /api/credentials/issue` - Issue credentials via OpenID4VCI
-
 ## 🔧 Architecture
 
 ### Frontend Components
@@ -79,11 +70,6 @@ The backend provides several endpoints for wallet integration:
 - **InvitationList**: Manages invitation history
 - **PresentationRequestForm**: Creates presentation requests
 - **IssueCredentialForm**: Enhanced with invitation URL generation
-
-### Services
-- **invitationService**: Manages invitation URL generation and storage
-- **credentialService**: Handles credential issuance and verification
-- **presentationService**: Manages presentation creation and verification
 
 ### Data Flow
 1. **Credential Issuance**: Create credential → Generate invitation → Share QR/URL
@@ -112,29 +98,6 @@ The generated invitation URLs and QR codes are compatible with mobile SSI wallet
 - W3C Verifiable Credentials
 - DID-based authentication
 - QR code invitation scanning
-
-## 🛠️ Development
-
-### Project Structure
-```
-src/
-├── components/          # React components
-│   ├── InvitationDisplay.tsx
-│   ├── PresentationRequestForm.tsx
-│   └── ...
-├── services/           # Business logic
-│   ├── invitationService.ts
-│   ├── credentialService.ts
-│   └── ...
-└── utils/              # Utilities
-server.js               # Express backend
-```
-
-### Key Technologies
-- **IOTA Identity WASM**: Core SSI functionality
-- **LocalStorage**: Client-side data persistence
-- **QR Code Generation**: For mobile wallet integration
-- **JWT Processing**: Credential and presentation format
 
 ## 📄 License
 
