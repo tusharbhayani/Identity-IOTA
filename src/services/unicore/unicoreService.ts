@@ -54,13 +54,14 @@ interface VerificationResult {
   authorizationRequestId?: string;
   authorizationUrl?: string;
   qrCodeData?: string;
+  status?: string;
+  presentationData?: unknown;
   error?: string;
 }
 
 class UniCoreService {
   private baseUrl: string;
   private issuerDid: string;
-  private issuerName: string;
 
   constructor() {
     const isLocalDev = window.location.hostname === "localhost";
@@ -70,7 +71,6 @@ class UniCoreService {
     this.baseUrl = this.baseUrl.replace(/\/$/, "");
 
     this.issuerDid = "http://192.168.29.111:3033/";
-    this.issuerName = "UniCore Issuer";
   }
 
   async getDidConfiguration(): Promise<unknown> {
@@ -87,11 +87,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 2 & 7: GET /.well-known/did.json
-   * Returns DID document
-   */
   async getDidDocument(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/.well-known/did.json`);
@@ -104,11 +99,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 3 & 8: GET /.well-known/oauth-authorization-server
-   * Returns OAuth authorization server metadata
-   */
   async getOAuthAuthorizationServer(): Promise<unknown> {
     try {
       const response = await fetch(
@@ -125,11 +115,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 4 & 9: GET /.well-known/openid-credential-issuer
-   * Returns OpenID credential issuer metadata
-   */
   async getOpenIdCredentialIssuer(): Promise<unknown> {
     try {
       const response = await fetch(
@@ -197,11 +182,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 11: GET /v0/credentials/{id}
-   * Retrieves a specific credential by ID
-   */
   async getCredential(credentialId: string): Promise<unknown> {
     try {
       const response = await fetch(
@@ -218,11 +198,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 12: GET /v0/offers
-   * Retrieves all offers
-   */
   async getAllOffers(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/v0/offers`);
@@ -237,11 +212,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 13: POST /v0/offers
-   * Creates a new offer
-   */
   async createOffer(offerRequest: OfferRequest): Promise<string> {
     try {
       const response = await fetch(`${this.baseUrl}/v0/offers`, {
@@ -267,11 +237,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 14: POST /v0/offers/send
-   * Sends an offer via specified method (email, SMS, webhook)
-   */
   async sendOffer(sendOfferRequest: SendOfferRequest): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/v0/offers/send`, {
@@ -296,11 +261,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 15: GET /v0/offers/{id}
-   * Retrieves a specific offer by ID
-   */
   async getOffer(offerId: string): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/v0/offers/${offerId}`);
@@ -332,11 +292,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * API 17: POST /v0/authorization_requests
-   * Creates a new authorization request for verification
-   */
   async createAuthorizationRequest(
     authRequest: AuthorizationRequest,
   ): Promise<unknown> {
@@ -359,16 +314,82 @@ class UniCoreService {
         );
       }
 
+      const locationHeader = response.headers.get("location");
+
       const contentType = response.headers.get("content-type");
       let result;
 
       if (contentType?.includes("application/json")) {
         result = await response.json();
       } else {
-        const text = await response.text();
+        const authorizationUrl = await response.text();
+
+        let requestId: string | null = null;
+
+        if (locationHeader) {
+          const locationMatch = locationHeader.match(
+            /authorization_requests\/([^/?]+)/,
+          );
+          if (locationMatch) {
+            requestId = locationMatch[1];
+          }
+        }
+
+        if (!requestId) {
+          try {
+            const urlMatch = authorizationUrl.match(/request_uri=([^&]+)/);
+            if (urlMatch) {
+              const requestUri = decodeURIComponent(urlMatch[1]);
+              const idMatch = requestUri.match(
+                /authorization_requests\/([^/?]+)/,
+              );
+              if (idMatch) {
+                requestId = idMatch[1];
+              } else {
+                console.warn("⚠️ Could not find request ID in URI");
+              }
+            } else {
+              console.warn("⚠️ Could not find request_uri parameter");
+            }
+          } catch (error) {
+            console.warn(
+              "Could not extract request ID from authorization URL:",
+              error,
+            );
+          }
+        }
+
+        if (!requestId) {
+          console.warn("Could not extract ID, will fetch from list endpoint");
+          try {
+            const allRequests =
+              (await this.getAllAuthorizationRequests()) as Array<{
+                id: string;
+                created_at?: string;
+              }>;
+            if (allRequests && allRequests.length > 0) {
+              const sortedRequests = allRequests.sort((a, b) => {
+                const timeA = a.created_at
+                  ? new Date(a.created_at).getTime()
+                  : 0;
+                const timeB = b.created_at
+                  ? new Date(b.created_at).getTime()
+                  : 0;
+                return timeB - timeA;
+              });
+              requestId = sortedRequests[0].id;
+            }
+          } catch (error) {
+            console.error(
+              "Failed to fetch authorization requests list:",
+              error,
+            );
+          }
+        }
+
         result = {
-          authorization_url: text,
-          id: `auth-${Date.now()}`,
+          authorization_url: authorizationUrl,
+          id: requestId || `auth-${Date.now()}`,
         };
       }
 
@@ -396,6 +417,81 @@ class UniCoreService {
       console.error("Failed to get authorization request:", error);
       throw error;
     }
+  }
+  async pollAuthorizationRequestStatus(
+    requestId: string,
+    maxAttempts: number = 60,
+    intervalMs: number = 2000,
+  ): Promise<{
+    success: boolean;
+    status?: string;
+    presentationData?: unknown;
+    error?: string;
+  }> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const authRequest = (await this.getAuthorizationRequest(requestId)) as {
+          id: string;
+          status?: string;
+          verifiable_presentation?: unknown;
+          response?: unknown;
+          vp_token?: unknown;
+          presentation_submission?: unknown;
+        };
+
+        if (
+          authRequest.vp_token !== null &&
+          authRequest.vp_token !== undefined
+        ) {
+          return {
+            success: true,
+            status: "fulfilled",
+            presentationData: authRequest.vp_token,
+          };
+        }
+
+        if (authRequest.verifiable_presentation || authRequest.response) {
+          return {
+            success: true,
+            status: "fulfilled",
+            presentationData:
+              authRequest.verifiable_presentation || authRequest.response,
+          };
+        }
+
+        if (
+          authRequest.status === "fulfilled" ||
+          authRequest.status === "completed" ||
+          authRequest.status === "verified"
+        ) {
+          return {
+            success: true,
+            status: authRequest.status,
+            presentationData: authRequest,
+          };
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
+      } catch (error) {
+        console.error(`Poll attempt ${attempt + 1} failed:`, error);
+
+        if (attempt < maxAttempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, intervalMs));
+          continue;
+        }
+
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Polling failed",
+        };
+      }
+    }
+
+    return {
+      success: false,
+      status: "timeout",
+      error: "Verification request timed out - no credentials presented",
+    };
   }
 
   private async getAvailableCredentialConfigurationId(
@@ -530,7 +626,7 @@ class UniCoreService {
       const authRequest: AuthorizationRequest = {
         response_type: "vp_token",
         client_id: this.issuerDid,
-        redirect_uri: `${window.location.origin}/verification/callback`,
+        redirect_uri: `${this.baseUrl.replace("/api", "")}/callback`,
         scope: "openid",
         state: `verify-${Date.now()}`,
         nonce: `nonce-${Date.now()}`,
@@ -559,15 +655,51 @@ class UniCoreService {
       };
     }
   }
-
-  /**
-   * Create verification request for a specific credential
-   */
   async createVerificationForCredential(
     credentialType: string,
     requiredFields?: Record<string, unknown>,
   ): Promise<VerificationResult> {
     return this.createVerificationRequest([credentialType], requiredFields);
+  }
+  async createVerificationAndWaitForPresentation(
+    credentialTypes: string[],
+    specificFields?: Record<string, unknown>,
+    maxWaitTimeSeconds: number = 120,
+  ): Promise<VerificationResult> {
+    try {
+      const verificationResult = await this.createVerificationRequest(
+        credentialTypes,
+        specificFields,
+      );
+
+      if (
+        !verificationResult.success ||
+        !verificationResult.authorizationRequestId
+      ) {
+        return verificationResult;
+      }
+
+      const maxAttempts = Math.floor(maxWaitTimeSeconds / 2);
+      const pollResult = await this.pollAuthorizationRequestStatus(
+        verificationResult.authorizationRequestId,
+        maxAttempts,
+        2000,
+      );
+
+      return {
+        ...verificationResult,
+        success: pollResult.success,
+        status: pollResult.status,
+        presentationData: pollResult.presentationData,
+        error: pollResult.error,
+      };
+    } catch (error) {
+      console.error("Verification with polling failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
   }
 
   private createCredentialPayload(
@@ -628,10 +760,6 @@ class UniCoreService {
       return offerUrl;
     }
   }
-
-  /**
-   * Get available credential configurations
-   */
   async getCredentialConfigurations(): Promise<unknown> {
     try {
       const response = await fetch(
@@ -648,10 +776,6 @@ class UniCoreService {
       throw error;
     }
   }
-
-  /**
-   * Get list of available credential configuration IDs
-   */
   async getAvailableConfigurationIds(): Promise<string[]> {
     try {
       const issuerMetadata = (await this.getOpenIdCredentialIssuer()) as {
@@ -668,10 +792,6 @@ class UniCoreService {
       return [];
     }
   }
-
-  /**
-   * Health check for UniCore service
-   */
   async healthCheck() {
     try {
       const response = await fetch(`${this.baseUrl}/v0/credentials`, {
@@ -724,10 +844,6 @@ class UniCoreService {
 
     return await this.issueCredential(credentialRequest);
   }
-
-  /**
-   * Create Work Permit credential
-   */
   async createWorkPermit(
     firstName: string,
     lastName: string,

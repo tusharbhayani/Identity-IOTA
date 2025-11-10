@@ -1,8 +1,3 @@
-/**
- * Local QR Code Generator Component
- * Generates QR codes locally without external API calls
- */
-
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 
@@ -74,9 +69,6 @@ export const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
     );
 };
 
-/**
- * Generate QR code as data URL
- */
 export const generateQRDataURL = async (
     data: string,
     size: number = 300,

@@ -1,8 +1,3 @@
-/**
- * Verification Callback Handler
- * Handles the response when a user presents credentials from their wallet
- */
-
 import React, { useEffect, useState } from 'react';
 import { Box, Card, Flex, Heading, Text, Button, Badge } from '@radix-ui/themes';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
