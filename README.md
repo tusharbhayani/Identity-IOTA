@@ -60,7 +60,7 @@ instant, verifiable credentials.
 ### Step 1: Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/tusharbhayani/Identity-IOTA
 cd borderless-identity
 ```
 
